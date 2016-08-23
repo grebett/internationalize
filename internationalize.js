@@ -7,7 +7,7 @@ const rimraf = require('rimraf');
 if (argv.h || argv.help) {
     console.log('Thank you for using internationalize.js tool. Basic usage is:\nnode internationalize.js --lang=en\n')
     console.log('Here is the complete list of options available:\n');
-    console.log(`    --lang\t${chalk.bold('[required]')} the list of languages to apply, separated with commas`);
+    console.log(`-l  --lang\t${chalk.bold('[required]')} the list of languages to apply, separated with commas`);
     console.log('-d  --delete\tdelete the source file after reading it');
     console.log('-f  --file\tread a specific file (default is \'index.html\')');
     console.log('-h  --help\tdisplay this current help');
@@ -16,7 +16,7 @@ if (argv.h || argv.help) {
 }
 
 // arguments errors
-if (argv.lang === undefined || typeof argv.lang !== 'string') {
+if ((argv.lang === undefined && argv.l === undefined) || (typeof argv.lang !== 'string' && typeof argv.l !== 'string')) {
     console.error(chalk.red(`Error: you must provide at least a language argument! Use ${chalk.white('node internationalize.js -h')} for help.`));
     return;
 }
@@ -67,7 +67,7 @@ var internationalize = (src, filename, inputDirectory, lang) => {
           if (error) {
             throw error;
           } else {
-            resolve(chalk.green(`Success: ${filename} has been internationalized with ${lang} translation keys.`));
+            resolve(chalk.green(`Success: ${chalk.white(filename)} has been internationalized with ${chalk.white(lang)} translation keys.`));
           }
         });
       }
@@ -76,7 +76,7 @@ var internationalize = (src, filename, inputDirectory, lang) => {
 }
 
 // main
-var langs = argv.lang.split(',');
+var langs = argv.l !== undefined ? argv.l.split(',') : argv.lang.split(',');
 var inputDirectoryOption = argv.i || argv.inputDirectory;
 var inputDirectory = typeof inputDirectoryOption === 'string' ? inputDirectoryOption.replace(/\/+$/, '') : './lang';
 if (inputDirectoryOption === '/') inputDirectory = '/';
