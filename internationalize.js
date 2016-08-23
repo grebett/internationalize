@@ -12,6 +12,7 @@ if (argv.h || argv.help) {
     console.log('-f  --file\tread a specific file (default is \'index.html\')');
     console.log('-h  --help\tdisplay this current help');
     console.log('-i  --input-directory\ttranslation keys directory (default is \'./lang\') ');
+    console.log('-t  --tags\topening and closing tag, separated with a comma (default is \'{{,}}\') ');
     return;
 }
 
@@ -40,7 +41,7 @@ try {
 }
 
 // internationalize logic
-var internationalize = (src, filename, inputDirectory, lang) => {
+var internationalize = (src, filename, inputDirectory, lang, tags) => {
   return new Promise((resolve, reject) => {
     // get language translation keys and handle file errors
     fs.readFile(`${inputDirectory}/${lang}.json`, (error, file) => {
@@ -59,9 +60,15 @@ var internationalize = (src, filename, inputDirectory, lang) => {
         }
 
         // apply translations keys
-        var regex = new RegExp(Object.keys(translations).map((key) => `{{${key}}}`).join('|'), 'gi');
-        var result = src.replace(regex, function(matched){
-          return translations[matched.substr(2, matched.length - 4)];
+        var str = Object.keys(translations).map((key) => `${tags[0]}${key}${tags[1]}`).join('|');
+        var escaped = str.replace(/[-[\]{}()*+?.,\\^$#\s]/g, '\\$&');
+
+        // return;
+        var regex = new RegExp(escaped, 'gi');
+        var result = src.replace(regex, matched => {
+          var key = matched.substring(tags[0].length, matched.length - tags[1].length);
+
+          return translations[key];
         });
         fs.writeFile(`./index_${lang}.html`, result, error => {
           if (error) {
@@ -75,14 +82,23 @@ var internationalize = (src, filename, inputDirectory, lang) => {
   });
 }
 
-// main
+
+// MAIN
 var langs = argv.l !== undefined ? argv.l.split(',') : argv.lang.split(',');
+var tagsOption = argv.t || argv.tags || undefined;
+var tags = tagsOption !== undefined && typeof tagsOption === 'string' ? tagsOption.split(',') : ['{{', '}}'];
+
+if (tags.length !== 2) {
+  console.error(chalk.red(`The tags given in argument must match the following pattern: opening_tag,closing_tag`));
+  return;
+}
+
 var inputDirectoryOption = argv.i || argv.inputDirectory;
 var inputDirectory = typeof inputDirectoryOption === 'string' ? inputDirectoryOption.replace(/\/+$/, '') : './lang';
 if (inputDirectoryOption === '/') inputDirectory = '/';
 
 for (var i = 0; i < langs.length; i++) {
-  internationalize(src, filename, inputDirectory, langs[i]).then(result => {
+  internationalize(src, filename, inputDirectory, langs[i], tags).then(result => {
     console.log(result);
   }, error => {
     console.error(chalk.red(error));
