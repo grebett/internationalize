@@ -1,0 +1,29 @@
+{
+  "name": "internationalize",
+  "version": "0.1.0",
+  "description": "Simple Node.js tool to replace variables in files with translation keys in separate JSON files. ",
+  "main": "internationalize.js",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "replace": "^0.3.0",
+    "rimraf": "^2.5.4",
+    "yargs": "^5.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grebett/internationalize.git"
+  },
+  "keywords": [
+    "internationalization"
+  ],
+  "author": "grebett",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grebett/internationalize/issues"
+  },
+  "homepage": "https://github.com/grebett/internationalize#readme"
+}
