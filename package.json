@@ -21,7 +21,7 @@
     "internationalization"
   ],
   "author": "grebett",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/grebett/internationalize/issues"
   },
