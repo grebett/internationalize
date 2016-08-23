@@ -19,6 +19,7 @@ Here is the complete list of options available:
 	-f  --file				read a specific file (default is 'index.html')
 	-h  --help				display help
 	-i  --input-directory	translation keys directory (default is './lang')
+	-t  --tags				opening and closing tag, separated with a comma (default is '{{,}}')
 
 ## License
 
