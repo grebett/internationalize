@@ -15,11 +15,13 @@ Basic usage is:
 Here is the complete list of options available:
 
 	-l  --lang				[required] the list of languages to apply, separated with commas
-	-d  --delete			delete the source file after reading it
+	-u  --unlink			delete the source file after reading it
 	-f  --file				read a specific file (default is 'index.html')
-	-h  --help				display help
+	-h  --help				display this current help
 	-i  --input-directory	translation keys directory (default is './lang')
 	-t  --tags				opening and closing tag, separated with a comma (default is '{{,}}')
+	-d  --output-directory	destination directory of the output file (default is ./dist)
+	-o  --output-name		output file name (default is input file name + "_" + lang)
 
 ## License
 

@@ -8,14 +8,14 @@ const rimraf = require('rimraf');
 if (argv.h || argv.help) {
     console.log('Thank you for using internationalize.js tool. Basic usage is:\nnode internationalize.js --lang=en\n')
     console.log('Here is the complete list of options available:\n');
-    console.log(`-l  --lang\t${chalk.bold('[required]')} the list of languages to apply, separated with commas`);
-    console.log('-u  --unlink\tdelete the source file after reading it');
-    console.log('-f  --file\tread a specific file (default is \'index.html\')');
-    console.log('-h  --help\tdisplay this current help');
+    console.log(`-l  --lang\t\t${chalk.bold('[required]')} the list of languages to apply, separated with commas`);
+    console.log('-u  --unlink\t\tdelete the source file after reading it');
+    console.log('-f  --file\t\tread a specific file (default is \'index.html\')');
+    console.log('-h  --help\t\tdisplay this current help');
     console.log('-i  --input-directory\ttranslation keys directory (default is \'./lang\')');
-    console.log('-t  --tags\topening and closing tag, separated with a comma (default is \'{{,}}\')');
-    console.log('-d  --output-directory\t destination directory of the output file');
-    console.log('-o  --output-name\t output file name (default is input file name + "_" + lang)');
+    console.log('-t  --tags\t\topening and closing tag, separated with a comma (default is \'{{,}}\')');
+    console.log('-d  --output-directory\tdestination directory of the output file (default is ./dist)');
+    console.log('-o  --output-name\toutput file name (default is input file name + "_" + lang)');
     return;
 }
 
@@ -88,7 +88,7 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
         }
 
         // is there a dist directory provided?
-        dist = argv.d || argv['output-directory'] || '.';
+        dist = argv.d || argv['output-directory'] || './dist';
 
         // create the dist directory if not exists
         if (!fs.existsSync(dist)){
@@ -96,7 +96,6 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
         }
 
         // write the file
-        console.log(path.join(dist, outputname));
         fs.writeFile(path.join(dist, outputname), result, error => {
           if (error) {
             throw error;
