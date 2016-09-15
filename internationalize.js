@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const argv = require('yargs').argv;
 const chalk = require('chalk');
 const rimraf = require('rimraf');
@@ -8,11 +9,13 @@ if (argv.h || argv.help) {
     console.log('Thank you for using internationalize.js tool. Basic usage is:\nnode internationalize.js --lang=en\n')
     console.log('Here is the complete list of options available:\n');
     console.log(`-l  --lang\t${chalk.bold('[required]')} the list of languages to apply, separated with commas`);
-    console.log('-d  --delete\tdelete the source file after reading it');
+    console.log('-u  --unlink\tdelete the source file after reading it');
     console.log('-f  --file\tread a specific file (default is \'index.html\')');
     console.log('-h  --help\tdisplay this current help');
-    console.log('-i  --input-directory\ttranslation keys directory (default is \'./lang\') ');
-    console.log('-t  --tags\topening and closing tag, separated with a comma (default is \'{{,}}\') ');
+    console.log('-i  --input-directory\ttranslation keys directory (default is \'./lang\')');
+    console.log('-t  --tags\topening and closing tag, separated with a comma (default is \'{{,}}\')');
+    console.log('-d  --output-directory\t destination directory of the output file');
+    console.log('-o  --output-name\t output file name (default is input file name + "_" + lang)');
     return;
 }
 
@@ -24,21 +27,20 @@ if ((argv.lang === undefined && argv.l === undefined) || (typeof argv.lang !== '
 
 // read the source file (by defaut `index.html`)
 try {
-  var filename = typeof argv.f === 'string' ? argv.f : 'index.html';
-    var src = fs.readFileSync(`${filename}`).toString();
+  var filename = argv.f || argv.file ? argv.f || argv.file : 'index.html';
+  var src = fs.readFileSync(`${filename}`).toString();
 
-    // delete source file if -d option is on
-    if (argv.d) {
-      rimraf.sync(filename);
-    }
+  // delete source file if -d option is on
+  if (argv.u || argv.unlink) {
+    rimraf.sync(filename);
+  }
 } catch (e) {
-    console.log(e); return;
-    if (e.message.match(/ENOENT/)) {
-        console.error(chalk.red(`Error: internationalize tried to read ${chalk.white(filename)} but it does not exists.`));
-    } else {
-        console.error(chalk.red(e.stack));
-    }
-    return;
+  if (e.message.match(/ENOENT/)) {
+      console.error(chalk.red(`Error: internationalize tried to read ${chalk.white(filename)} but it does not exists.`));
+  } else {
+      console.error(chalk.red(e.stack));
+  }
+  return;
 }
 
 // internationalize logic
@@ -63,15 +65,38 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
         // apply translations keys
         var str = Object.keys(translations).map((key) => `${tags[0]}${key}${tags[1]}`).join('|');
         var escaped = str.replace(/[-[\]{}()*+?.,\\^$#\s]/g, '\\$&');
-
-        // return;
         var regex = new RegExp(escaped, 'gi');
         var result = src.replace(regex, matched => {
           var key = matched.substring(tags[0].length, matched.length - tags[1].length);
 
           return translations[key];
         });
-        fs.writeFile(`./index_${lang}.html`, result, error => {
+
+        // create path according to option values
+        var dist = '.';
+        var outpuname;
+        var inputname = argv.f || argv.file || 'index.html';
+        inputname = inputname.split('/');
+        inputname = inputname[inputname.length - 1];
+
+        // if the output name is provided, take it as it is
+        if (typeof argv.o === 'string' || typeof argv['output-name'] === 'string') {
+          outputname = argv.o || argv['output-name'];
+        } else {
+          outputname = inputname.replace(/\..*$/, '');
+          outputname += `_${lang}.html`;
+        }
+
+        // is there a dist directory provided?
+        dist = argv.d || argv['output-directory'] || '';
+
+        // create the dist directory if not exists
+        if (!fs.existsSync(dist)){
+          fs.mkdirSync(dist);
+        }
+
+        // write the file
+        fs.writeFile(path.join(dist, filename), result, error => {
           if (error) {
             throw error;
           } else {
@@ -85,9 +110,9 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
 
 
 // MAIN
-var langs = argv.l !== undefined ? argv.l.split(',') : argv.lang.split(',');
-var tagsOption = argv.t || argv.tags || undefined;
-var tags = tagsOption !== undefined && typeof tagsOption === 'string' ? tagsOption.split(',') : ['{{', '}}'];
+var langs = argv.l ? argv.l.split(',') : argv.lang.split(',');
+var tagsOption = argv.t || argv.tags;
+var tags = tagsOption ? tagsOption.split(',') : ['{{', '}}'];
 
 if (tags.length !== 2) {
   console.error(chalk.red(`The tags given in argument must match the following pattern: opening_tag,closing_tag`));
@@ -95,8 +120,10 @@ if (tags.length !== 2) {
 }
 
 var inputDirectoryOption = argv.i || argv.inputDirectory;
-var inputDirectory = typeof inputDirectoryOption === 'string' ? inputDirectoryOption.replace(/\/+$/, '') : './lang';
-if (inputDirectoryOption === '/') inputDirectory = '/';
+var inputDirectory = inputDirectoryOption ? inputDirectoryOption.replace(/\/+$/, '') : './lang';
+if (inputDirectoryOption === '/') {
+  inputDirectory = '/';
+}
 
 for (var i = 0; i < langs.length; i++) {
   internationalize(src, filename, inputDirectory, langs[i], tags).then(result => {
