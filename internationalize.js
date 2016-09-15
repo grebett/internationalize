@@ -88,7 +88,7 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
         }
 
         // is there a dist directory provided?
-        dist = argv.d || argv['output-directory'] || '';
+        dist = argv.d || argv['output-directory'] || '.';
 
         // create the dist directory if not exists
         if (!fs.existsSync(dist)){
@@ -96,7 +96,8 @@ var internationalize = (src, filename, inputDirectory, lang, tags) => {
         }
 
         // write the file
-        fs.writeFile(path.join(dist, filename), result, error => {
+        console.log(path.join(dist, outputname));
+        fs.writeFile(path.join(dist, outputname), result, error => {
           if (error) {
             throw error;
           } else {
