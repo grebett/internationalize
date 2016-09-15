@@ -25,13 +25,14 @@ if ((argv.lang === undefined && argv.l === undefined) || (typeof argv.lang !== '
 // read the source file (by defaut `index.html`)
 try {
   var filename = typeof argv.f === 'string' ? argv.f : 'index.html';
-    var src = fs.readFileSync(`./${filename}`).toString();
+    var src = fs.readFileSync(`${filename}`).toString();
 
     // delete source file if -d option is on
     if (argv.d) {
       rimraf.sync(filename);
     }
 } catch (e) {
+    console.log(e); return;
     if (e.message.match(/ENOENT/)) {
         console.error(chalk.red(`Error: internationalize tried to read ${chalk.white(filename)} but it does not exists.`));
     } else {
